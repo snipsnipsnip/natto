@@ -34,9 +34,9 @@
           .attr("r", 4.5)
 
       node.append("text")
-          .attr("dx", (d) -> d.children ? -8 : 8)
+          .attr("dx", (d) -> if d.children then -8 else 8)
           .attr("dy", 3)
-          .style("text-anchor", (d) -> d.children ? "end" : "start")
+          .style("text-anchor", (d) -> if d.children then "end" else "start")
           .text((d) -> d.name)
 
     d3.select(self.frameElement).style("height", height + "px")
