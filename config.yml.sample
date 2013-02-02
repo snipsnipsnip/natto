@@ -1,0 +1,7 @@
+production:
+  session_secret: changeme
+
+development:
+  session_secret: changeme
+
+
