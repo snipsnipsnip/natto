@@ -11,7 +11,7 @@ require 'sinatra/static_assets'
 require 'sinatra/config_file'
 require 'sequel'
 
-require_relative 'lib/octowalker'
+require_relative 'lib/dep_walker'
 
 configure do
   config_file 'config.yml'
@@ -19,12 +19,25 @@ configure do
 end
 
 helpers do
-  def github
+  def walk(reponame)
     # TODO: per-user auth
-    @github ||= OctoWalker.new(settings.github_auth)
+    DepWalker.new(sequel, settings.github_auth).walk(reponame)
+  end
+  
+  def sequel
+    @sequel ||= begin
+      db = Sequel.connect(settings.database_url)
+      db.loggers << Logger.new(STDOUT) if settings.database_logging
+      db
+    end
   end
 end
 
 get '/' do
   slim :index
+end
+
+get '/walk' do
+  content_type :json
+  walk
 end
