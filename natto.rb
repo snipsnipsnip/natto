@@ -9,7 +9,6 @@ require 'sinatra'
 require 'sinatra/content_for'
 require 'sinatra/static_assets'
 require 'sinatra/config_file'
-require 'sequel'
 
 require_relative 'lib/dep_walker'
 
@@ -21,15 +20,13 @@ end
 helpers do
   def walk(reponame)
     # TODO: per-user auth
-    DepWalker.new(sequel, settings.github_auth).walk(reponame)
-  end
-  
-  def sequel
-    @sequel ||= begin
-      db = Sequel.connect(settings.database_url)
-      db.loggers << Logger.new(STDOUT) if settings.database_logging
-      db
+    dict = {}
+    
+    def dict.[](path)
+      super.call
     end
+    
+    DepWalker.new(dict, settings.github_auth).walk(reponame)
   end
 end
 
@@ -39,5 +36,5 @@ end
 
 get '/walk' do
   content_type :json
-  walk
+  walk 'snipsnipsnip/natto.git'
 end
