@@ -1,7 +1,15 @@
 production:
   session_secret: changeme
+  github_auth:
+    client_id: foo
+    client_secret: bar
+    # or
+    oauth_token: baz
 
 development:
   session_secret: changeme
-
-
+  github_auth:
+    client_id: foo
+    client_secret: bar
+    # or
+    oauth_token: baz
