@@ -13,7 +13,7 @@ class Dep
 
   # sources has a method [] : (path : String) -> String
   def initialize(sources, out)
-    @out = out
+    @io = out
     @ignore_file_matcher = nil
     @source_code_filters = []
     @case_sensitive = false

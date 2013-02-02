@@ -13,20 +13,28 @@ class DepWalker
   end
   
   def walk(reponame)
-    octowalker.each_blob(reponame) do |sha1, path, content_promise|
-      @sources.add(sha1, path, content_promise)
+    @octowalker.each_blob(reponame) do |sha1, path, content_promise|
+      @sources[path] = content_promise
     end
     
     dep_visitor = make_dep_visitor
-    dep = Dep.new(@sources, dep_visitor)
+    $? == 0 or
     
-    # TODO: make use of various options
-    dep.run(sources.keys)
-    
-    {:nodes => dep_visitor.nodes, :links => dep_visitor.links}
+    with_graphviz do |f|
+      dep = Dep.new(@sources, f)
+      dep.run(@sources.keys)
+      f.close_write
+      f.read
+    end
   end
   
   private
+  
+  def with_graphviz
+    IO.popen('cat', 'rb+') do |f|
+      yield f
+    end
+  end
   
   def make_deferred_source_dict
     dict = {}

@@ -5,7 +5,7 @@ require 'octokit'
 # Github APIを使ってリポジトリ中のblobを取得する。
 class OctoWalker
   def initialize(kit_or_options)
-    @kit = kit_or_options.respond_to?(:repo) ? kit_or_options : Octokit::Client.new(options)
+    @kit = kit_or_options.respond_to?(:repo) ? kit_or_options : Octokit::Client.new(kit_or_options)
   end
   
   # yields each blob: [sha1, path, () -> content]
