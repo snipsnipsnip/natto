@@ -4,52 +4,6 @@ require 'optparse'
 require 'set'
 
 class Dep
-  def self.main(argv=ARGV)
-    dep = new
-    froms = []
-    tos = []
-    
-    OptionParser.new do |o|
-      o.banner += " source-file.."
-      
-      o.on('-i REGEXP', '--ignore', 'ignore files') do |arg|
-        dep.ignore_file_matcher and warn "warning: overwriting ignore expression; you should use |"
-        dep.ignore_file_matcher = Regexp.new(arg)
-      end
-      
-      o.on('-s REGEXP', '--gsub-from', 'filter source code like s///g (from part)') do |arg|
-        froms << Regexp.new(arg)
-      end
-      
-      o.on('-g TO', '--gsub-to', 'filter source code like s///g (to part)') do |arg|
-        tos << arg
-      end
-      
-      o.on('-c', '--case-sensitive', "make module name case sensitive (default: #{dep.case_sensitive})") do |a|
-        dep.case_sensitive = a
-      end
-      
-      o.on('-l', '--cluster', TrueClass, "clustering by directory structure (default: #{dep.cluster})") do |a|
-        dep.cluster = a
-      end
-      
-      o.parse!(argv)
-      
-      if froms.size != tos.size
-        warn o.help
-        abort "specify filter in form of: -s foo -g bar"
-      end
-      
-      if argv.empty?
-        abort o.help
-      end
-    end
-    
-    dep.source_code_filters = froms.zip(tos)
-  
-    dep.run(argv)
-  end
-  
   attr_accessor :ignore_file_matcher
   attr_accessor :source_code_filters
   attr_accessor :case_sensitive
