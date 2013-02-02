@@ -35,5 +35,5 @@ end
 
 get '/walk' do
   content_type :json
-  walk 'snipsnipsnip/natto.git'
+  walk 'snipsnipsnip/natto'
 end
