@@ -34,6 +34,6 @@ get '/' do
 end
 
 get '/walk' do
-  content_type :json
+  content_type :gif
   walk 'snipsnipsnip/natto'
 end
