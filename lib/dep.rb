@@ -1,8 +1,9 @@
 require 'set'
 
 =begin
-ソースをスキャンして中の文章から依存関係を（本当に）適当に推測する。
-やっつけスクリプトから移植したので若干つくりが変。
+ソースをスキャンして中の文章から依存関係をとても適当に推測する。
+やっつけスクリプトから移植したのでつくりが変。
+具体的には標準出力にプリントするところをvisitorに置き換えた。
 TODO: きちんと依存関係とかの名詞にする
 =end
 class Dep
@@ -11,7 +12,7 @@ class Dep
   attr_accessor :case_sensitive
   attr_accessor :cluster
 
-  # sources has a method [] : (path : String) -> String
+  # sources has a method [] : (source_path : String) -> source_code : String
   # out has a method link : (from_nodename : String, to_nodename : String) -> nil
   # out has a method node : (nodename : String, node_label : String, source_files : [String], fan_in : Fixnum, fan_out : Fixnum) -> nil
   def initialize(sources, out)
@@ -23,7 +24,7 @@ class Dep
     @sources = sources
   end
   
-  #
+  # source_paths 
   def run(source_paths)
     graph = scan(@source_code_filters, @case_sensitive, list(source_paths, @ignore_file_matcher))
     print_flat(graph)
@@ -73,7 +74,6 @@ class Dep
   def calc_nodename(filepath)
     calc_label(filepath).downcase.gsub('_', '')
   end
-  
 
   def print_flat(dep)
     dep.each do |node_name, node|
@@ -97,5 +97,3 @@ class Dep
     @out.node(node_name, node.label, node.files, fan_in, fan_out)
   end
 end
-
-Dep.main if $0 == __FILE__
