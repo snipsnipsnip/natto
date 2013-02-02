@@ -1,13 +1,14 @@
-require_relative 'octowalker'
+require_relative 'octo_walker'
 require_relative 'dep'
 
 =begin
 octowalkerとdepを使ってソースを読み込みつつ依存関係のグラフを作る。
 =end
 class DepWalker
-  def walk(octowalker, reponame)
+  def walk(reponame, octowalker_or_options)
     sources = make_deferred_source_dict
     
+    octowalker = octowalker_or_options.respond_to?(:each_blob) ? octowalker_or_options : OctoWalker.new(octowalker_or_options)
     octowalker.each_blob(reponame) do |sha1, path, content_promise|
       # TODO: データベースなどにブロブをキャッシュ
       sources[path] = content_promise
