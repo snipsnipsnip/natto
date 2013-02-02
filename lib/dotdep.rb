@@ -9,12 +9,13 @@ class Dep
   attr_accessor :case_sensitive
   attr_accessor :cluster
 
-  def initialize
+  def initialize(sources)
     @io = STDOUT
     @ignore_file_matcher = nil
     @source_code_filters = []
     @case_sensitive = false
     @cluster = false
+    @sources = sources
   end
 
   def run(globs)
@@ -30,7 +31,11 @@ class Dep
   private
   
   def list(globs, ignore)
-    globs.map {|g| Dir[g].reject {|x| ignore === x } }.flatten
+    globs.reject {|x| ignore === x }
+  end
+
+  def read_source(filename)
+    @sources[filename]
   end
 
   def scan(gsub, case_sensitive, sources)
@@ -42,7 +47,7 @@ class Dep
     
     tree = {}
     sources.zip(nodenames, labels) do |filename, nodename, label|
-      source = File.read(filename)
+      source = read_source(filename)
       gsub.each {|from, to| source.gsub!(from, to) }
       
       node = (tree[nodename] ||= make_node(label, filename))
