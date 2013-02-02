@@ -1,11 +1,19 @@
 require 'set'
 
+=begin
+ソースをスキャンして中の文章から依存関係を（本当に）適当に推測する。
+やっつけスクリプトから移植したので若干つくりが変。
+TODO: きちんと依存関係とかの名詞にする
+=end
 class Dep
   attr_accessor :ignore_file_matcher
   attr_accessor :source_code_filters
   attr_accessor :case_sensitive
   attr_accessor :cluster
 
+  # sources has a method [] : (path : String) -> String
+  # out has a method link : (from_nodename : String, to_nodename : String) -> nil
+  # out has a method node : (nodename : String, node_label : String, source_files : [String], fan_in : Fixnum, fan_out : Fixnum) -> nil
   def initialize(sources, out)
     @out = out
     @ignore_file_matcher = nil
@@ -14,16 +22,17 @@ class Dep
     @cluster = false
     @sources = sources
   end
-
-  def run(globs)
-    graph = scan(@source_code_filters, @case_sensitive, list(globs, @ignore_file_matcher))
+  
+  #
+  def run(source_paths)
+    graph = scan(@source_code_filters, @case_sensitive, list(source_paths, @ignore_file_matcher))
     print_flat(graph)
   end
   
   private
   
-  def list(globs, ignore)
-    globs.reject {|x| ignore === x }
+  def list(source_paths, ignore)
+    source_paths.reject {|x| ignore === x }
   end
 
   def read_source(filename)
