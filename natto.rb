@@ -4,7 +4,6 @@
 # natto: a qiita hackathon 03 product
 
 require 'slim'
-require 'sass'
 require 'sinatra'
 require 'sinatra/content_for'
 require 'sinatra/static_assets'
