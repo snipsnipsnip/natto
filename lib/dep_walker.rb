@@ -5,13 +5,16 @@ require_relative 'dep'
 octowalkerとdepを使ってソースを読み込みつつ依存関係のグラフを作る。
 =end
 class DepWalker
-  def walk(reponame, octowalker_or_options)
-    sources = make_deferred_source_dict
-    
-    octowalker = octowalker_or_options.respond_to?(:each_blob) ? octowalker_or_options : OctoWalker.new(octowalker_or_options)
+  # source_cache has a method [] : String -> String
+  # source_cache has a method add : sha1 : String -> path : String -> content_promise : String
+  def initialize(source_cache, octowalker_or_options)
+    @sources = source_cache
+    @octowalker = octowalker_or_options.respond_to?(:each_blob) ? octowalker_or_options : OctoWalker.new(octowalker_or_options)
+  end
+  
+  def walk(reponame)
     octowalker.each_blob(reponame) do |sha1, path, content_promise|
-      # TODO: データベースなどにブロブをキャッシュ
-      sources[path] = content_promise
+      @sources.add(sha1, path, content_promise)
     end
     
     dep_visitor = make_dep_visitor

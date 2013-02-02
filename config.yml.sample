@@ -1,5 +1,6 @@
 production:
   session_secret: changeme
+  database_logging: true
   github_auth:
     client_id: foo
     client_secret: bar
@@ -8,6 +9,7 @@ production:
 
 development:
   session_secret: changeme
+  database_logging: false
   github_auth:
     client_id: foo
     client_secret: bar
