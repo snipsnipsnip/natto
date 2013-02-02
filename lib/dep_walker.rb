@@ -18,7 +18,6 @@ class DepWalker
     end
     
     dep_visitor = make_dep_visitor
-    $? == 0 or
     
     with_graphviz do |f|
       dep = Dep.new(@sources, f)
