@@ -1,6 +1,3 @@
-@ruby -x "%~f0" %* & exit /b
-#!/usr/bin/ruby -Ku
-require 'optparse'
 require 'set'
 
 class Dep
