@@ -1,0 +1,22 @@
+html
+  head
+    meta http-equiv="Content-type" content="text/html; charset=UTF-8"
+    == stylesheet_link_tag "css/bootstrap.min.css"
+    == stylesheet_link_tag "css/natto.css"
+  body
+    .navbar
+      .navbar-inner
+        .container
+          a.brand href="#"
+            h1 natto
+    
+    .container.natto
+    
+    == javascript_script_tag "js/jquery-1.9.0.min.js"
+    == javascript_script_tag "js/bootstrap.min.js"
+    == javascript_script_tag "js/jsonselect.min.js"
+    == javascript_script_tag "js/d3.v3.min.js"
+    == javascript_script_tag "js/natto.js"
+    
+    javascript:
+      jQuery(natto.init)
