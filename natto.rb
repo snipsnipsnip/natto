@@ -41,7 +41,7 @@ get '/' do
 end
 
 get '/:user/:repo' do |user, repo|
-  user =~ /\A[-_a-z\d]+\z/i and repo =~ /\A[-_a-z\d]+\z/i or fail 404
+  user =~ /\A[\-_a-z\d]+\z/i and repo =~ /\A[\-_a-z\d]+\z/i or fail Sinatra::NotFound
   content_type :svg
   walk("#{user}/#{repo}")
 end
