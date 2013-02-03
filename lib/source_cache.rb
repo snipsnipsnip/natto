@@ -3,6 +3,12 @@ class SourceCache
   def initialize(sequel)
     @sources = {}
     @sequel = sequel
+    
+    sequel.create_table?(:blob_cache) do
+      String :sha1, :primary_key => true, :null => false
+      String :content, :null => false
+      String :path, :null => false
+    end
   end
   
   def [](path)
@@ -20,7 +26,7 @@ class SourceCache
     else
       @sources[path] = lambda do
         src = promise.call
-        @sequel[:blob_cache].insert(:content => src, :sha1 => sha1)
+        @sequel[:blob_cache].insert(:content => src, :sha1 => sha1, :path => path)
         @sources[path] = src
         src
       end

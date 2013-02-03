@@ -20,20 +20,17 @@ end
 helpers do
   def walk(reponame)
     # TODO: per-user auth
-    dict = SourceCache.new(sequel)
-    DepWalker.new(dict, settings.github_auth).walk(reponame)
+    DepWalker.new(source_cache, settings.github_auth).walk(reponame)
+  end
+  
+  def source_cache
+    @source_cache ||= SourceCache.new(sequel)
   end
   
   def sequel
     @sequel ||= begin
       db = Sequel.connect(settings.database_url)
       db.loggers << Logger.new(STDOUT) if settings.database_logging
-      
-      db.create_table?(:blob_cache) do
-        String :sha1
-        String :content
-      end
-      
       db
     end
   end
