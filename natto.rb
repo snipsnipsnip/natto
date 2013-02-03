@@ -10,6 +10,7 @@ require 'sinatra/static_assets'
 require 'sinatra/config_file'
 
 require_relative 'lib/dep_walker'
+require_relative 'lib/source_cache'
 
 configure do
   config_file 'config.yml'
@@ -19,13 +20,22 @@ end
 helpers do
   def walk(reponame)
     # TODO: per-user auth
-    dict = {}
-    
-    def dict.[](path)
-      super.call
-    end
-    
+    dict = SourceCache.new(sequel)
     DepWalker.new(dict, settings.github_auth).walk(reponame)
+  end
+  
+  def sequel
+    @sequel ||= begin
+      db = Sequel.connect(settings.database_url)
+      db.loggers << Logger.new(STDOUT) if settings.database_logging
+      
+      db.create_table?(:source) do
+        String :sha1
+        String :content
+      end
+      
+      db
+    end
   end
 end
 
