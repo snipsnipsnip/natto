@@ -1,6 +1,6 @@
 
 class SourceCache
-  def initialize
+  def initialize(sequel)
     @sources = {}
     @sequel = sequel
   end
@@ -15,7 +15,7 @@ class SourceCache
   end
   
   def add(sha1, path, promise)
-    if record = @sequel[:source].select(:source).where(:sha1 => sha1)
+    if record = @sequel[:source].select(:source).where(:sha1 => sha1).first
       @sources[path] = record[:source]
     else
       @sources[path] = lambda do

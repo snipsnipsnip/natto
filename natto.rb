@@ -43,7 +43,8 @@ get '/' do
   slim :index
 end
 
-get '/walk' do
-  content_type :gif
-  walk 'snipsnipsnip/natto'
+get '/:user/:repo' do |user, repo|
+  user =~ /\A[-_a-z\d]+\z/i and repo =~ /\A[-_a-z\d]+\z/i or fail 404
+  content_type :svg
+  walk("#{user}/#{repo}")
 end

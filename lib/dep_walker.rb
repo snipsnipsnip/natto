@@ -30,7 +30,7 @@ class DepWalker
   private
   
   def with_graphviz
-    IO.popen('dot -Tgif', 'rb+') do |f|
+    IO.popen('dot -Tsvg', 'rb+') do |f|
       yield f
     end
   end
