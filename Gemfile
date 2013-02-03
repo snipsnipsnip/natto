@@ -7,6 +7,7 @@ gem "sequel", "~> 3.41.0"
 gem "slim", "~> 1.2.1"
 gem "octokit"
 gem "json"
+gem "ruby-graphviz"
 
 group :development do
   gem "sass", "~> 3.1.16", :require => false

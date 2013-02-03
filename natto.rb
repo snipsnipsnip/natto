@@ -19,9 +19,11 @@ end
 
 helpers do
   def walk(reponame)
-    # TODO: per-user auth
-    dict = SourceCache.new(sequel)
-    DepWalker.new(dict, settings.github_auth).walk(reponame)
+    session[reponame] ||= begin
+      # TODO: per-user auth
+      dict = SourceCache.new(sequel)
+      DepWalker.new(dict, settings.github_auth).walk(reponame)
+    end
   end
   
   def sequel
@@ -43,7 +45,14 @@ get '/' do
   slim :index
 end
 
-get '/walk' do
+get '/:user/:repo.gif' do |user, repo|
+  user =~ /\A[-_a-z\d]+\z/i and repo =~ /\A[-_a-z\d]+\z/i or fail
   content_type :gif
-  walk 'snipsnipsnip/natto'
+  walk("#{user}/#{repo}")[:image]
+end
+
+get '/:user/:repo' do |user, repo|
+  user =~ /\A[-_a-z\d]+\z/i and repo =~ /\A[-_a-z\d]+\z/i or fail
+  content_type :html
+  walk("#{user}/#{repo}")[:map]
 end

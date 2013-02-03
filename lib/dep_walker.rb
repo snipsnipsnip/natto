@@ -1,3 +1,5 @@
+require 'graphviz'
+require 'stringio'
 require_relative 'octo_walker'
 require_relative 'dep'
 
@@ -17,20 +19,51 @@ class DepWalker
       @sources.add(sha1, path, content_promise)
     end
     
-    dep_visitor = make_dep_visitor
+    out = StringIO.new
+    dep_visitor = DepDot.new(out)
+    dep = Dep.new(@sources, dep_visitor)
+    dep.header
+    dep.run(@sources.keys)
+    dep.footer
     
-    with_graphviz do |f|
-      dep = Dep.new(@sources, f)
-      dep.run(@sources.keys)
+    dot = out.to_s
+    
+    {:image => render_graph(dot), :map => make_map(dot)}
+  end
+  
+  private
+  
+  def render_graph(graph)
+    with_graphviz('-Tgif') do |f|
+      dot = DepDot.new(f)
+      dot.header
+      graph.nodes.each {|*a| dot.node *a }
+      graph.links.each {|*a| dot.link *a }
+      dot.footer
+      
       f.close_write
       f.read
     end
   end
   
-  private
+  def make_map(graph)
+  end
   
-  def with_graphviz
-    IO.popen('dot -Tgif', 'rb+') do |f|
+  def graphviz(opt, graph)
+    with_graphviz(opt) do |f|
+      dot = DepDot.new(f)
+      dot.header
+      graph.nodes.each {|*a| dot.node *a }
+      graph.links.each {|*a| dot.link *a }
+      dot.footer
+      
+      f.close_write
+      f.read
+    end
+  end
+  
+  def with_graphviz(opt)
+    IO.popen("dot #{opt}", 'rb+') do |f|
       yield f
     end
   end
@@ -46,18 +79,47 @@ class DepWalker
   end
   
   def make_dep_visitor
-    DepVisitor.new([], [])
+    DepCollector.new([], [])
   end
   
-  DepVisitor = Struct.new(:nodes, :links)
+  DepCollector = Struct.new(:nodes, :links)
   
-  class DepVisitor
+  class DepCollector
     def node(nodename, node_label, source_files, fan_in, fan_out)
       nodes << nodename
     end
     
     def link(from_nodename, to_nodename)
       links << {:source => from_nodename, :target => to_nodename}
+    end
+  end
+  
+  class DepDot
+    def initialize(io)
+      @io = io
+    end
+    
+    def node(from, to)
+      @io.puts %{#{from}" -> "#{to}";}
+    end
+    
+    def node(node_name, node_label, node_files, fan_in, fan_out)
+      node_files.each {|f| @io.puts %{/* #{f} */} }
+      @io.puts %{"#{node_name}" [label = "#{node_label}|{#{fan_in} in|#{fan_out} out}", shape = Mrecord];}
+    end
+    
+    def header
+      @io.puts '// try tred tool of graphviz if you want simpler (transitively reduced) graph'
+      @io.puts 'digraph {'
+      @io.puts '  overlap = false;'
+      @io.puts '  rankdir = LR;'
+      @io.puts '  node [style = filled, fontcolor = "#123456", fillcolor = white, fontsize = 30, fontname="Arial, Helvetica"];'
+      @io.puts '  edge [color = "#661122"];'
+      @io.puts '  bgcolor = "transparent";'
+    end
+    
+    def footer
+      @io.puts '}'
     end
   end
 end
