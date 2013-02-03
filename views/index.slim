@@ -13,9 +13,18 @@ html
     
     .container.natto
     
+    form action="/v" style="font-size: 30pt; width: 12em; height: 2em"
+      input type="text" name="reponame"
+    
+    
     == javascript_script_tag "js/jquery-1.9.0.min.js"
     == javascript_script_tag "js/bootstrap.min.js"
-    == javascript_script_tag "js/jsonselect.min.js"
+    / == javascript_script_tag "js/jquery.svg.pack.js"
+    / == javascript_script_tag "js/jquery.svganim.pack.js"
+    / == javascript_script_tag "js/jquery.svgfilter.pack.js"
+    == javascript_script_tag "js/jquery.svg.package/jquery.svg.js"
+    == javascript_script_tag "js/jquery.svg.package/jquery.svganim.js"
+    == javascript_script_tag "js/jquery.svg.package/jquery.svgfilter.js"
     == javascript_script_tag "js/d3.v3.min.js"
     == javascript_script_tag "js/natto.js"
     

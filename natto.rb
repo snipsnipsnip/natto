@@ -8,6 +8,7 @@ require 'sinatra'
 require 'sinatra/content_for'
 require 'sinatra/static_assets'
 require 'sinatra/config_file'
+require 'sinatra/config_file'
 
 require_relative 'lib/dep_walker'
 require_relative 'lib/source_cache'
@@ -49,4 +50,9 @@ get '/:user/:repo' do |user, repo|
   user =~ /\A[\-_a-z\d]+\z/i and repo =~ /\A[\-_a-z\d]+\z/i or fail Sinatra::NotFound
   content_type :svg
   walk("#{user}/#{repo}")
+end
+
+
+get '/v' do
+  redirect '/' + params[:reponame]
 end

@@ -1,3 +1,6 @@
+node = undefined
+link = undefined
+
 (exports ? this).natto =
   init: ($) ->
     
