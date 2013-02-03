@@ -14,7 +14,7 @@ class DepWalker
   
   def walk(reponame)
     @octowalker.each_blob(reponame) do |sha1, path, content_promise|
-      @sources[path] = content_promise
+      @sources.add(sha1, path, content_promise)
     end
     
     dep_visitor = make_dep_visitor
