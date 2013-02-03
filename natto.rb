@@ -11,6 +11,7 @@ require 'sinatra/config_file'
 
 require_relative 'lib/dep_walker'
 require_relative 'lib/source_cache'
+require_relative 'lib/cached_kit'
 
 configure do
   config_file 'config.yml'
@@ -20,7 +21,11 @@ end
 helpers do
   def walk(reponame)
     # TODO: per-user auth
-    DepWalker.new(source_cache, settings.github_auth).walk(reponame)
+    DepWalker.new(source_cache, OctoWalker.new(cached_kit)).walk(reponame)
+  end
+  
+  def cached_kit
+    @cached_kit ||= CachedKit.new(sequel, Octokit::Client.new(settings.github_auth))
   end
   
   def source_cache
