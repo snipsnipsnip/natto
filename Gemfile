@@ -11,7 +11,7 @@ gem "json", "1.7.3"
 group :development do
   gem "sass", "~> 3.1.16", :require => false
   gem "coffee-script", :require => false
-  gem "thin", :require => false
+  gem "thin", '1.2.11', :require => false
 end
 
 group :test do

@@ -15,12 +15,12 @@ class SourceCache
   end
   
   def add(sha1, path, promise)
-    if record = @sequel[:source].select(:source).where(:sha1 => sha1).first
-      @sources[path] = record[:source]
+    if record = @sequel[:blob_cache].select(:content).where(:sha1 => sha1).first
+      @sources[path] = record[:content]
     else
       @sources[path] = lambda do
         src = promise.call
-        @sequel[:source].insert(:source => src, :sha1 => sha1)
+        @sequel[:blob_cache].insert(:content => src, :sha1 => sha1)
         @sources[path] = src
         src
       end

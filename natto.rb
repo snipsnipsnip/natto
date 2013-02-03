@@ -29,7 +29,7 @@ helpers do
       db = Sequel.connect(settings.database_url)
       db.loggers << Logger.new(STDOUT) if settings.database_logging
       
-      db.create_table?(:source) do
+      db.create_table?(:blob_cache) do
         String :sha1
         String :content
       end
