@@ -7,7 +7,7 @@ gem "sequel", "~> 3.41.0"
 gem "slim", "~> 1.2.1"
 gem "octokit"
 gem "git"
-gem "json", "1.7.3"
+gem "json"
 gem "ruby-mysql", :require => false
 
 group :development do
