@@ -5,9 +5,9 @@ octowalkerとdepを使ってソースを読み込みつつ依存関係のグラ�
 class DepWalker
   # source_cache has a method [] : String -> String
   # source_cache has a method add : sha1 : String -> path : String -> content_promise : String
-  def initialize(source_cache, octowalker_or_options)
+  def initialize(source_cache, octowalker)
     @sources = source_cache
-    @octowalker = octowalker_or_options.respond_to?(:each_blob) ? octowalker_or_options : OctoWalker.new(octowalker_or_options)
+    @octowalker = octowalker
   end
   
   def walk(reponame)
