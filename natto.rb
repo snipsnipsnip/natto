@@ -45,7 +45,7 @@ class MemorySourceCache
   end
   
   def path_of(sha1)
-    @contents.fetch(sha1)
+    @paths.fetch(sha1)
   end
 end
 
