@@ -15,16 +15,20 @@ require 'natto/repo'
 
 configure do
   config_file 'config.yml'
+  
+  unless settings.respond_to?(:git_binary)
+    set :git_binary, 'git'
+  end
+
+  unless settings.respond_to?(:repos_dir)
+    set :repos_dir, File.join(settings.root, 'tmp', 'repos')
+  end
 end
 
 helpers do
   def walk(reponame)
     # TODO: per-user auth
-    DepWalker.new(source_cache, Repo.new(octokit)).walk(reponame)
-  end
-  
-  def octokit
-    @octokit ||= Octokit::Client.new(settings.github_auth)
+    DepWalker.new(source_cache, Repo.new(settings.git_binary, settings.repos_dir)).walk(reponame)
   end
   
   def source_cache

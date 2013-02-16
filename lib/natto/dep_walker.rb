@@ -1,5 +1,3 @@
-require_relative 'octo_walker'
-require_relative 'dep'
 
 =begin
 octowalkerとdepを使ってソースを読み込みつつ依存関係のグラフを作る。

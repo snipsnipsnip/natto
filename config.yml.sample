@@ -1,6 +1,11 @@
 production:
   session_secret: changeme
   database_logging: true
+  git_binary: git
+  # repodir: /tmp/repodir
+  
+  database_url: sqlite:///
+
   github_auth:
     client_id: foo
     client_secret: bar
@@ -9,7 +14,12 @@ production:
 
 development:
   session_secret: changeme
-  database_logging: false
+  database_logging: true
+  git_binary: git
+  # repodir: /tmp/repodir
+
+  database_url: sqlite:///
+
   github_auth:
     client_id: foo
     client_secret: bar
