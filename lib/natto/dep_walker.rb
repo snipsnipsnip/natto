@@ -16,6 +16,7 @@ class DepWalker
     files = []
     
     @octowalker.each_blob(reponame) do |sha1, path, content_promise|
+      next unless path =~ /\.(?:c|cpp|h|hpp|rb)/
       @sources.add(sha1, path, content_promise)
       files << sha1
     end
