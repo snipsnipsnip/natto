@@ -10,7 +10,6 @@ require 'sinatra/static_assets'
 require 'sinatra/config_file'
 
 require 'natto/dep_walker'
-require 'natto/source_cache'
 require 'natto/repo'
 
 configure do
@@ -25,6 +24,31 @@ configure do
   end
 end
 
+class MemorySourceCache
+  def initialize
+    @paths = {}
+    @contents = {}
+  end
+
+  def add(sha1, path, promise)
+    @paths[sha1] = path
+    @contents[sha1] = promise
+  end
+  
+  def [](sha1)
+    src = @contents.fetch(sha1)
+    if src.respond_to?(:call)
+      @contents[sha1] = src.call
+    else
+      src
+    end
+  end
+  
+  def path_of(sha1)
+    @contents.fetch(sha1)
+  end
+end
+
 helpers do
   def walk(reponame)
     # TODO: per-user auth
@@ -32,7 +56,7 @@ helpers do
   end
   
   def source_cache
-    @source_cache ||= SourceCache.new(sequel)
+    @source_cache ||= MemorySourceCache.new
   end
   
   def sequel
