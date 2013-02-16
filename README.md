@@ -3,6 +3,8 @@ natto
 
 a Qiita Hackathon03 product.
 
+[スライド](http://goo.gl/gSeiI)
+
 rackup して githubのpath (例: /takano32/skype-bridge)を入れると
 githubからクローンしてきてソースの関係をSVGにします　（要Graphvizのdot）
 
