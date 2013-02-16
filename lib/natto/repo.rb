@@ -33,7 +33,8 @@ class Repo
   
   private
   def git_with_result(args, &blk)
-    result = `#{@git_binary} #{args.join(' ')}`
+    cmd = [@git_binary, *args]
+    result = IO.popen(cmd, 'rb') {|f| f.read }
     $? == 0 or raise "#{cmd.inspect} failed"
     result.each_line(&blk)
   end
