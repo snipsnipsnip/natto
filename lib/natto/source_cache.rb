@@ -7,7 +7,7 @@ class SourceCache
     
     sequel.create_table?(:blob_cache) do
       String :sha1, :primary_key => true, :null => false
-      String :content, :null => false
+      text :content, :null => false
     end
   end
   
