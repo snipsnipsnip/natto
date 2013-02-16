@@ -1,25 +1,47 @@
 # coding: utf-8
 
-require 'octokit'
+require 'fileutils'
 
-# Github APIを使ってリポジトリ中のblobを取得する。
 class Repo
-  def initialize(kit_or_options)
-    @kit = kit_or_options.respond_to?(:repo) ? kit_or_options : Octokit::Client.new(kit_or_options)
+  def initialize(git_binary, reposdir)
+    @git_binary = git_binary
+    @reposdir = reposdir
   end
   
   # yields each blob: [sha1, path, () -> content]
   def each_blob(reponame)
-    repoinfo = @kit.repo(reponame)
-    commit_info = @kit.list_commits(reponame, repoinfo.default_branch, :per_page => 1)[0]
-    commit = @kit.commit(reponame, commit_info.sha)
-    tree = @kit.tree(reponame, commit.commit.tree.sha, :recursive => 1)
-    
-    tree.tree.each do |object|
-      if object.type == 'blob'
-        content = lambda { @kit.blob(reponame, object.sha, :accept => 'application/vnd.github.raw') }
-        yield object.sha, object.path, content
-      end
+    unless reponame =~ /[a-z\d_-]+\/[a-z\d_-]+/i
+      raise ArgumentError, "reponame seems invalid"
     end
+    
+    repourl = "git://github.com/#{reponame}"
+    repodir = File.join(@reposdir, reponame)
+    if Dir.exist?(repodir)
+      git %W[--work-tree #{repodir} --git-dir #{File.join(repodir, '.git')} fetch]
+    else
+      FileUtils::Verbose.mkdir_p repodir
+      git %W[clone #{repourl} #{repodir}]
+    end
+    
+    git_with_result(%W[ls-tree -r --full-name HEAD]) do |line|
+      record = line.split
+      record.size == 4 or raise "#{cmd.inspect} failed"
+      mod, type, sha, path = record
+      yield sha, path, lambda { File.read(File.join(repodir, path)) }
+    end
+  end
+  
+  private
+  def git_with_result(args, &blk)
+    result = `#{@git_binary} #{args.join(' ')}`
+    $? == 0 or raise "#{cmd.inspect} failed"
+    result.each_line(&blk)
+  end
+  
+  def git(args)
+    cmd = [@git_binary, *args]
+    warn cmd.inspect
+    system *cmd
+    $? == 0 or raise "#{cmd.inspect} failed"
   end
 end
