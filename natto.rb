@@ -11,7 +11,7 @@ require 'sinatra/config_file'
 
 require 'natto/dep_walker'
 require 'natto/source_cache'
-require 'natto/octo_walker'
+require 'natto/repo'
 
 configure do
   config_file 'config.yml'
@@ -20,7 +20,7 @@ end
 helpers do
   def walk(reponame)
     # TODO: per-user auth
-    DepWalker.new(source_cache, OctoWalker.new(octokit)).walk(reponame)
+    DepWalker.new(source_cache, Repo.new(octokit)).walk(reponame)
   end
   
   def octokit
