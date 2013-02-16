@@ -48,11 +48,11 @@ get '/' do
   slim :index
 end
 
-get '/:user/:repo/:commit' do |user, repo|
+get '/:user/:repo' do |user, repo|
   user =~ /\A[\-_a-z\d]+\z/i and
     user =~ /\A[\-_a-z\d]+\z/i or
     not_found
   
   content_type :svg
-  walk(user, repo)
+  walk("#{user}/#{repo}")
 end
