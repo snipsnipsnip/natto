@@ -8,25 +8,23 @@ require 'sinatra'
 require 'sinatra/content_for'
 require 'sinatra/static_assets'
 require 'sinatra/config_file'
-require 'sinatra/config_file'
 
-require_relative 'lib/dep_walker'
-require_relative 'lib/source_cache'
-require_relative 'lib/cached_kit'
+require 'natto/dep_walker'
+require 'natto/source_cache'
+require 'natto/repo'
 
 configure do
   config_file 'config.yml'
-  set :sessions, {:key => 'z'}
 end
 
 helpers do
   def walk(reponame)
     # TODO: per-user auth
-    DepWalker.new(source_cache, OctoWalker.new(cached_kit)).walk(reponame)
+    DepWalker.new(source_cache, Repo.new(octokit)).walk(reponame)
   end
   
-  def cached_kit
-    @cached_kit ||= CachedKit.new(sequel, Octokit::Client.new(settings.github_auth))
+  def octokit
+    @octokit ||= Octokit::Client.new(settings.github_auth)
   end
   
   def source_cache
@@ -46,13 +44,11 @@ get '/' do
   slim :index
 end
 
-get '/:user/:repo' do |user, repo|
-  user =~ /\A[\-_a-z\d]+\z/i and repo =~ /\A[\-_a-z\d]+\z/i or fail Sinatra::NotFound
+get '/:user/:repo/:commit' do |user, repo|
+  user =~ /\A[\-_a-z\d]+\z/i and
+    user =~ /\A[\-_a-z\d]+\z/i or
+    not_found
+  
   content_type :svg
-  walk("#{user}/#{repo}")
-end
-
-
-get '/v' do
-  redirect '/' + params[:reponame]
+  walk(user, repo)
 end
