@@ -23,7 +23,7 @@ class Repo
       git %W[clone #{repourl} #{repodir}]
     end
     
-    git_with_result(%W[ls-tree -r --full-name HEAD]) do |line|
+    git_with_result(%W[--work-tree #{repodir} --git-dir #{File.join(repodir, '.git')} ls-tree -r --full-name HEAD]) do |line|
       record = line.split
       record.size == 4 or raise "#{cmd.inspect} failed"
       mod, type, sha, path = record
