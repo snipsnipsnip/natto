@@ -9,23 +9,22 @@ require 'sinatra/content_for'
 require 'sinatra/static_assets'
 require 'sinatra/config_file'
 
-require_relative 'lib/dep_walker'
-require_relative 'lib/source_cache'
-require_relative 'lib/cached_kit'
+require 'natto/dep_walker'
+require 'natto/source_cache'
+require 'natto/octo_walker'
 
 configure do
   config_file 'config.yml'
-  set :sessions, {:key => 'z'}
 end
 
 helpers do
   def walk(reponame)
     # TODO: per-user auth
-    DepWalker.new(source_cache, OctoWalker.new(cached_kit)).walk(reponame)
+    DepWalker.new(source_cache, OctoWalker.new(octokit)).walk(reponame)
   end
   
-  def cached_kit
-    @cached_kit ||= CachedKit.new(sequel, Octokit::Client.new(settings.github_auth))
+  def octokit
+    @octokit ||= Octokit::Client.new(settings.github_auth)
   end
   
   def source_cache
