@@ -13,15 +13,18 @@ class DepWalker
   end
   
   def walk(reponame)
+    files = []
+    
     @octowalker.each_blob(reponame) do |sha1, path, content_promise|
-      @sources[path] = content_promise
+      @sources.add(sha1, path, content_promise)
+      files << sha1
     end
     
     dep_visitor = make_dep_visitor
     
     with_graphviz do |f|
       dep = Dep.new(@sources, f)
-      dep.run(@sources.keys)
+      dep.run(files)
       f.close_write
       f.read
     end
@@ -30,7 +33,7 @@ class DepWalker
   private
   
   def with_graphviz
-    IO.popen('cat', 'rb+') do |f|
+    IO.popen('dot -Tsvg', 'rb+') do |f|
       yield f
     end
   end

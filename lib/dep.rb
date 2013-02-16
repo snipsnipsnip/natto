@@ -6,7 +6,6 @@ require 'set'
 TODO: きちんと依存関係とかの名詞にする
 =end
 class Dep
-  attr_accessor :ignore_file_matcher
   attr_accessor :source_code_filters
   attr_accessor :case_sensitive
   attr_accessor :cluster
@@ -14,42 +13,41 @@ class Dep
   # sources has a method [] : (path : String) -> String
   def initialize(sources, out)
     @io = out
-    @ignore_file_matcher = nil
     @source_code_filters = []
     @case_sensitive = false
     @cluster = false
     @sources = sources
   end
 
-  def run(source_paths)
-    graph = scan(@source_code_filters, @case_sensitive, list(source_paths, @ignore_file_matcher))
+  def run(source_ids)
+    graph = scan(@source_code_filters, @case_sensitive, source_ids)
     print_flat(graph)
   end
   
   private
   
-  def list(source_paths, ignore)
-    source_paths.reject {|x| ignore === x }
+  def read_source(sha)
+    @sources[sha]
   end
-
-  def read_source(filename)
-    @sources[filename]
+  
+  def get_filepath(sha)
+    @sources.path_of(sha)
   end
 
   def scan(gsub, case_sensitive, sources)
-    labels = sources.map {|x| calc_label x }
-    nodenames = sources.map {|x| calc_nodename x }
+    labels = sources.map {|x| calc_label get_filepath(x) }
+    nodenames = sources.map {|x| calc_nodename get_filepath(x) }
     
     patterns = labels.map {|n| Regexp.escape(n).gsub('_', '_?') }.sort_by {|n| -n.size }
     pattern = Regexp.new("\\b(?:#{patterns.join('|')})", !case_sensitive)
     
     tree = {}
-    sources.zip(nodenames, labels) do |filename, nodename, label|
-      source = read_source(filename)
+    sources.zip(nodenames, labels) do |source_id, nodename, label|
+      source = read_source(source_id)
       gsub.each {|from, to| source.gsub!(from, to) }
       
-      node = (tree[nodename] ||= make_node(label, filename))
-      node.files << filename
+      node = (tree[nodename] ||= make_node(label, source_id))
+      node.files << source_id
       source.scan(pattern) {|s| node.links << calc_nodename(s) }
       node.links.delete(nodename)
     end
@@ -57,58 +55,18 @@ class Dep
     tree
   end
   
-  Node = Struct.new(:label, :files, :links, :cluster)
+  Node = Struct.new(:label, :files, :links, :id)
   
-  def make_node(label, filename)
-    Node.new(label, [], Set.new, calc_cluster_name(filename))
+  def make_node(label, sha)
+    Node.new(label, [], Set.new, sha)
   end
   
-  def calc_cluster_name(filename)
-    File.basename(File.dirname(filename))
+  def calc_label(filename)
+    File.basename(filename, '.*')
   end
   
-  def calc_label(filepath)
-    File.basename(filepath, '.*')
-  end
-  
-  def calc_nodename(filepath)
-    calc_label(filepath).downcase.gsub('_', '')
-  end
-  
-  def calc_cluster(dep)
-    dep.group_by {|k,v| v.cluster }
-  end
-  
-  def print_cluster(graph, clusters)
-    links = {}
-    outer_links = Set.new
-    
-    graph.each do |nodename, node|
-      node.links.each do |destname|
-        if clusters[node.cluster].any? {|n, _| n == destname }
-          (links[node.cluster] ||= Set.new) << [nodename, destname]
-        else
-          outer_links << [nodename, destname]
-        end
-      end
-    end
-    
-    print_digraph do
-      indent = '    '
-    
-      links.each_with_index do |(cluster_name, links), i|
-        print_subgraph(i, cluster_name) do
-          clusters[cluster_name].each do |name, node|
-            print_node(graph, name, node, indent)
-          end
-          
-          links.each {|from, to| print_link(from, to, indent) }
-        end
-      end
-      
-      indent = '  '      
-      outer_links.each {|from, to| print_link(from, to, indent) }
-    end
+  def calc_nodename(filename)
+    calc_label(filename).downcase.gsub('_', '')
   end
 
   def print_flat(dep)
@@ -132,16 +90,6 @@ class Dep
     end
   end
   
-  def print_subgraph(number, label)
-    @io.puts "  subgraph cluster#{number} {"
-    @io.puts "    label = #{label.inspect};"
-    @io.puts %{   fontcolor = "#123456"; fontsize = 30; fontname="Arial, Helvetica";}
-    
-    yield
-    
-    @io.puts "  }"
-  end
-  
   def print_link(from, to, indent=nil)
     @io.puts %{#{indent}"#{from}" -> "#{to}";} if from != to
   end
@@ -150,7 +98,7 @@ class Dep
     node.files.each {|f| @io.puts %{#{indent}/* #{f} */} }
     fan_in = graph.count {|n,d| d.links.include?(node_name) }
     fan_out = node.links.size
-    @io.puts %{#{indent}"#{node_name}" [label = "#{node.label}|{#{fan_in} in|#{fan_out} out}", shape = Mrecord];}
+    @io.puts %{#{indent}"#{node_name}" [id="#{node.id}", label="#{node.label}|{#{fan_in} in|#{fan_out} out}", shape = Mrecord];}
   end
   
   def print_digraph

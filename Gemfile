@@ -6,13 +6,13 @@ gem "sinatra-static-assets", "~> 1.0.4"
 gem "sequel", "~> 3.41.0"
 gem "slim", "~> 1.2.1"
 gem "octokit"
-gem "json"
+gem "json", "1.7.3"
+gem "ruby-mysql", :require => false
 
 group :development do
   gem "sass", "~> 3.1.16", :require => false
   gem "coffee-script", :require => false
-  gem "ruby-mysql", :require => false
-  gem "thin", :require => false
+  gem "thin", '1.2.11', :require => false
 end
 
 group :test do
