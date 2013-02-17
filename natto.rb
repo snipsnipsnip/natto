@@ -74,7 +74,7 @@ end
 
 get '/:user/:repo' do |user, repo|
   user =~ /\A[\-_a-z\d]+\z/i and
-    user =~ /\A[\-_a-z\d]+\z/i or
+    repo =~ /\A[\-_a-z\d]+\z/i or
     not_found
   
   content_type :svg
