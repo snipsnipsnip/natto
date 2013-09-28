@@ -56,7 +56,7 @@ helpers do
   end
   
   def source_cache
-    @source_cache ||= MemorySourceCache.new
+    MemorySourceCache.new
   end
   
   def sequel
